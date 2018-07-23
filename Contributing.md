@@ -1,8 +1,7 @@
 ## Contributing
 
-We value any contribution to Bamboo.ElasticEmailAdapter you can provide: a bug
-report, a feature request, or code contributions. Here are our guidelines for
-contributions:
+We value any contribution to CSQuery you can provide: a bug report, a feature
+request, or code contributions. Here are our guidelines for contributions:
 
 *   Changes *will not* be accepted without tests.
 *   Match our coding style; we use [Credo][] and `mix format`.
