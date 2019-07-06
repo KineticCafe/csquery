@@ -47,13 +47,11 @@ defmodule CSQuery.OperatorOption do
   """
   def new(name, value)
 
-  @spec new(names, nil) :: nil
+  @spec new(names | atom, nil | term) :: nil | t
   def new(_, nil), do: nil
 
-  @spec new(atom, any) :: nil
   def new(name, _) when not (name in @names), do: nil
 
-  @spec new(names, any) :: t | nil
   def new(name, value) do
     %__MODULE__{name: name, value: to_string(value)}
   rescue

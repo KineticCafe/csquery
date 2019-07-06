@@ -44,13 +44,11 @@ defmodule CSQuery.FieldValue do
 
   See `new/2` for more information.
   """
-  @spec new(t | map | values | Range.t()) :: t
+  @spec new(nil | t | struct | map | values | Range.t()) :: t | nil
   def new(%__MODULE__{} = value), do: value
 
-  @spec new(struct) :: t
   def new(%_mod{} = value), do: new(nil, value)
 
-  @spec new(%{required(atom | String.t()) => values | nil | Range.t()}) :: t | nil
   def new(%{} = value) do
     with [name | _] <- Map.keys(value), %{^name => value} <- value do
       new(name, value)
@@ -59,7 +57,6 @@ defmodule CSQuery.FieldValue do
     end
   end
 
-  @spec new(values | nil | Range.t()) :: t
   def new(value), do: new(nil, value)
 
   @doc """

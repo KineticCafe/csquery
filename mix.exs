@@ -12,7 +12,7 @@ defmodule CSQuery.Mixfile do
 
   @deps [
     {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-    {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
+    {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
     {:excoveralls, "~> 0.8", only: [:dev, :test], runtime: false},
     {:ex_doc, "~> 0.14", only: [:dev, :test], runtime: false},
     {:inch_ex, "~> 0.5", only: [:dev, :test], runtime: false}

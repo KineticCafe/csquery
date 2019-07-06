@@ -110,24 +110,27 @@ defmodule CSQuery.Range do
 
   defstruct [:first, :first?, :last, :last?]
 
+  @type range_value :: nil | number | String.t() | DateTime.t()
+  @type number_range :: Range.t() | {nil | number, nil | number}
+  @type string_range :: {nil | String.t(), nil | String.t()}
+  @type date_range :: {nil | DateTime.t(), nil | DateTime.t()}
+
   @doc """
   Create a new `CSQuery.Range` value.
   """
-  @spec new(Range.t()) :: t
+  @spec new(number_range | string_range | date_range | map) :: t | no_return
   def new(%Range{first: first, last: last}), do: %__MODULE__{first: first, last: last}
 
-  @spec new({nil | number, nil | number}) :: t | no_return
-  @spec new({nil | String.t(), nil | String.t()}) :: t | no_return
-  @spec new({nil | DateTime.t(), nil | DateTime.t()}) :: t | no_return
   def new({_, _} = value), do: build(value)
 
-  @spec new(map) :: t | no_return
   def new(%{} = range), do: build(range)
 
+  @spec to_value(t) :: String.t()
   def to_value(%{first: first, first?: first?, last: last, last?: last?}) do
-    lower(value(first), value(first?)) <> "," <> upper(value(last), value(last?))
+   lower(value(first), value(first?)) <> "," <> upper(value(last), value(last?))
   end
 
+  @spec is_range_string?(String.t()) :: boolean
   def is_range_string?(value) do
     value
     |> String.split(",")
@@ -141,6 +144,7 @@ defmodule CSQuery.Range do
     end
   end
 
+  @spec value(nil | number | String.t() | DateTime.t()) :: nil | number | String.t()
   defp value(nil), do: nil
 
   defp value(value) when is_number(value), do: value
@@ -151,42 +155,47 @@ defmodule CSQuery.Range do
 
   @blank [nil, ""]
 
+  @spec lower(range_value, range_value) :: String.t()
   defp lower(f, f?) when f in @blank and f? in @blank, do: "{"
 
   defp lower(f, f?) when f in @blank, do: "{#{f?}"
 
   defp lower(f, _), do: "[#{f}"
 
+  @spec upper(range_value, range_value) :: String.t()
   defp upper(l, l?) when l in @blank and l? in @blank, do: "}"
 
   defp upper(l, l?) when l in @blank, do: "#{l?}}"
 
   defp upper(l, _), do: "#{l}]"
 
+  @spec build({range_value, range_value} | map) :: t | no_return
   defp build({first, last}), do: valid?(%__MODULE__{first: first, last: last})
 
   defp build(%{} = range), do: valid?(struct(__MODULE__, range))
 
+  @spec valid?(t) :: t | no_return
   defp valid?(%__MODULE__{} = range) do
-    case valid?(Map.values(range)) do
+    case check_valid?(Map.values(range)) do
       true -> range
       exception when is_atom(exception) -> raise(exception)
     end
   end
 
-  defp valid?([_, nil, nil, nil, nil]), do: CSQuery.OpenRangeError
+  @spec check_valid?([...]) :: true | module
+  defp check_valid?([_, nil, nil, nil, nil]), do: CSQuery.OpenRangeError
 
-  defp valid?([_, a, b, c, d])
+  defp check_valid?([_, a, b, c, d])
        when (is_nil(a) or is_number(a)) and (is_nil(b) or is_number(b)) and
               (is_nil(c) or is_number(c)) and (is_nil(d) or is_number(d)),
        do: true
 
-  defp valid?([_, a, b, c, d])
+  defp check_valid?([_, a, b, c, d])
        when (is_nil(a) or is_binary(a)) and (is_nil(b) or is_binary(b)) and
               (is_nil(c) or is_binary(c)) and (is_nil(d) or is_binary(d)),
        do: true
 
-  defp valid?([_, a, b, c, d])
+  defp check_valid?([_, a, b, c, d])
        when (is_nil(a) or is_map(a)) and (is_nil(b) or is_map(b)) and (is_nil(c) or is_map(c)) and
               (is_nil(d) or is_map(d)) do
     [a, b, c, d]
@@ -196,5 +205,5 @@ defmodule CSQuery.Range do
     |> if(do: true, else: CSQuery.RangeValueTypeError)
   end
 
-  defp valid?(_range), do: CSQuery.RangeValueTypeError
+  defp check_valid?(_range), do: CSQuery.RangeValueTypeError
 end
